@@ -15,6 +15,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import lk.ijse.asms.dao.custom.PaymentPlaneDAO;
 import lk.ijse.asms.dao.custom.impl.PaymentPlaneDAOImpl;
+import lk.ijse.asms.dao.util.PaymentPlaneType;
 import lk.ijse.asms.dto.PaymentPlaneDTO;
 import lk.ijse.asms.util.Navigation;
 import lk.ijse.asms.util.Routes;
@@ -126,13 +127,26 @@ public class PaymentPlaneUpdateFormController {
     }
 
     private void setDescription() {
+
         try {
-            ArrayList<String> desc= paymentPlaneDAO.getPointDescription(String.valueOf(cmbPointType.getValue()));
-            txtDescription.setText(String.valueOf(desc.get(0)));
-            txtUnitPrice.setText(String.valueOf(desc.get(1)));
+            PaymentPlaneDTO pointDetails = paymentPlaneDAO.getPointDetails(setCmbPointType());
+            txtDescription.setText(pointDetails.getDescription());
+            txtUnitPrice.setText(String.valueOf(pointDetails.getUnitPrice()));
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private PaymentPlaneType setCmbPointType(){
+        PaymentPlaneType pointType=null;
+        if(cmbPointType.getValue().equals("DATA")){
+            pointType=PaymentPlaneType.DATA;
+        }else if(cmbPointType.getValue().equals("POWER")){
+            pointType=PaymentPlaneType.POWER;
+        }else {
+            pointType=PaymentPlaneType.CAMERA;
+        }
+        return pointType;
     }
 }

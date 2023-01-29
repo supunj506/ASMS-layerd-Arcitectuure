@@ -1,38 +1,16 @@
 package lk.ijse.asms.dao.custom.impl;
 
+import lk.ijse.asms.dao.util.PaymentPlaneType;
 import lk.ijse.asms.dao.util.SQLUtil;
 import lk.ijse.asms.dao.custom.PaymentPlaneDAO;
 import lk.ijse.asms.dto.PaymentPlaneDTO;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+
 public class PaymentPlaneDAOImpl implements PaymentPlaneDAO {
-    //////////////////////////////security na array list ekakin ganna nisa//////////////////////////////////////////////////
-    @Override
-    public ArrayList<Integer> getPointPrice() throws SQLException, ClassNotFoundException {
-        ResultSet rst= SQLUtil.execute("select unite_price from pp_plane");
-        ArrayList<Integer>list=new ArrayList<>();
-        while(rst.next()){
-            list.add(rst.getInt(1));
 
-        }
-        return list;
-    }
-
-    //////////////////////////////////////aulak naaa/////////////////////////////////////////////////////////
-    @Override
-    public ArrayList<String> getPointDescription(String point) throws SQLException, ClassNotFoundException {
-        ResultSet rst= SQLUtil.execute("select description,unite_price from pp_plane where name=?",point);
-        ArrayList<String> desc=new ArrayList<>();
-        while (rst.next()){
-            desc.add(rst.getString(1));
-            desc.add(rst.getString(2));
-
-        }
-        return desc;
-    }
     @Override
     public boolean updatePPPlane(PaymentPlaneDTO paymentPlaneDTO) throws SQLException, ClassNotFoundException {
         return SQLUtil.execute("Update pp_plane set description=?,unite_price=? where name=?",
@@ -49,9 +27,34 @@ public class PaymentPlaneDAOImpl implements PaymentPlaneDAO {
                     rst.getString(1),
                     rst.getString(2),
                     rst.getString(3),
-                    Double.parseDouble(rst.getString(4))));
+                    rst.getDouble(4)));
         }
         return plane;
     }
+    @Override
+    public PaymentPlaneDTO getPointDetails(PaymentPlaneType type) throws SQLException, ClassNotFoundException {
+        ResultSet rst=null;
+
+        switch (type){
+            case DATA:
+                rst=SQLUtil.execute("select * from pp_plane where name='DATA'");
+                break;
+            case POWER:
+                rst=SQLUtil.execute("select * from pp_plane where name='POWER'");
+                break;
+            case CAMERA:
+                rst=SQLUtil.execute("select * from pp_plane where name='CAMERA'");
+                break;
+        }
+        if(rst.next()){
+            return new PaymentPlaneDTO(
+                    rst.getString(1),
+                    rst.getString(2),
+                    rst.getString(3),
+                    rst.getDouble(4));
+        }
+        return null;
+    }
+
 
 }

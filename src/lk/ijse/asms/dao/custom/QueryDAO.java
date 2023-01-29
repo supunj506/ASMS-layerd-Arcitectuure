@@ -2,7 +2,6 @@ package lk.ijse.asms.dao.custom;
 
 import javafx.collections.ObservableList;
 import lk.ijse.asms.view.tm.TeamTM;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 

@@ -8,8 +8,10 @@ import javafx.event.ActionEvent;
 import javafx.scene.layout.AnchorPane;
 import lk.ijse.asms.dao.custom.*;
 import lk.ijse.asms.dao.custom.impl.*;
+import lk.ijse.asms.dao.util.PaymentPlaneType;
 import lk.ijse.asms.dto.EmployeeDTO;
 import lk.ijse.asms.dto.JobDTO;
+import lk.ijse.asms.dto.SubPaymentDTO;
 import lk.ijse.asms.util.Navigation;
 import lk.ijse.asms.util.Routes;
 import net.sf.jasperreports.engine.*;
@@ -66,15 +68,17 @@ public class PaymentReportFormController {
 
     public void contractPaymentOnAction(ActionEvent actionEvent) {
         String[]temp=String.valueOf(cmbJob.getValue()).split(" / ");
+        String employeeId=temp[2];
+        String jobId=temp[1];
+        String subcPayId=temp[0];
         try {
-            EmployeeDTO employeeDTO = employeeDAO.getEmployee(temp[2]);
+            EmployeeDTO employeeDTO = employeeDAO.getEmployee(employeeId);
             HashMap paramMap=new HashMap();
             paramMap.put("Eid", employeeDTO.getId());
             paramMap.put("Enic", employeeDTO.getNic());
             paramMap.put("Ename", employeeDTO.getName());
             paramMap.put("Eaddress", employeeDTO.getAddress());
-            System.out.println(temp[1]);
-            JobDTO abc = jobDAO.getJobById(temp[1]);
+            JobDTO abc = jobDAO.getJobById(jobId);
 
             Date startDate = java.sql.Date.valueOf(abc.getStartDate());
             Date endDate = java.sql.Date.valueOf(abc.getEndDate());
@@ -83,18 +87,25 @@ public class PaymentReportFormController {
             paramMap.put("Jstart",startDate );
             paramMap.put("Jend",endDate );
 
-            ArrayList<Integer>pointCount= paymentDAO.getPointCount(temp[0]);
-            paramMap.put("dataC",pointCount.get(0));
-            paramMap.put("powerC",pointCount.get(1));
-            paramMap.put("cameraC",pointCount.get(2));
-            ArrayList<Integer> pointPrice = paymentPlaneDAO.getPointPrice();
-            paramMap.put("dataV",Double.parseDouble(String.valueOf(pointPrice.get(0))));
-            paramMap.put("powerV",Double.parseDouble(String.valueOf(pointPrice.get(1))));
-            paramMap.put("cameraV",Double.parseDouble(String.valueOf(pointPrice.get(2))));
+            int dataCount = (paymentDAO.getSubPaymentById(subcPayId)).getData_point();
+            int powerCount = (paymentDAO.getSubPaymentById(subcPayId)).getData_point();
+            int cameraCount = (paymentDAO.getSubPaymentById(subcPayId)).getData_point();
+            paramMap.put("dataC",dataCount);
+            paramMap.put("powerC",powerCount);
+            paramMap.put("cameraC",cameraCount);
 
-            double dataT=pointPrice.get(0)*pointCount.get(0);
-            double powerT=pointPrice.get(1)*pointCount.get(1);
-            double cameraT=pointPrice.get(2)*pointCount.get(2);
+            double dataUnitPrice=(paymentPlaneDAO.getPointDetails(PaymentPlaneType.DATA)).getUnitPrice();
+            double powerUnitPrice=(paymentPlaneDAO.getPointDetails(PaymentPlaneType.POWER)).getUnitPrice();
+            double cameraUnitPrice=(paymentPlaneDAO.getPointDetails(PaymentPlaneType.CAMERA)).getUnitPrice();
+            paramMap.put("dataV",dataUnitPrice);
+            paramMap.put("powerV",powerUnitPrice);
+            paramMap.put("cameraV",cameraUnitPrice);
+
+
+
+            double dataT=dataUnitPrice*dataCount;
+            double powerT=powerUnitPrice*powerCount;
+            double cameraT=cameraUnitPrice*cameraCount;
 
             paramMap.put("dataT",dataT);
             paramMap.put("powerT",powerT);

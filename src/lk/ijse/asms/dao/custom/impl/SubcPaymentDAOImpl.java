@@ -5,6 +5,7 @@ import lk.ijse.asms.dao.util.SQLUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class SubcPaymentDAOImpl implements SubcPaymentDAO {
@@ -39,15 +40,20 @@ public class SubcPaymentDAOImpl implements SubcPaymentDAO {
         }
 
     @Override
-    public ArrayList<Integer> getPointCount(String id) throws SQLException, ClassNotFoundException {
-        ResultSet rst= SQLUtil.execute("select data_point,power_point,camera_point from subc_payment where id=?",id);
-        ArrayList<Integer>point=new ArrayList<>();
-        while (rst.next()){
-            point.add(rst.getInt(1));
-            point.add(rst.getInt(2));
-            point.add(rst.getInt(3));
+    public SubPaymentDTO getSubPaymentById(String id) throws SQLException, ClassNotFoundException {
+        ResultSet rst=SQLUtil.execute("select * from subc_payment where id=?",id);
+        if(rst.next()){
+            return new SubPaymentDTO(
+                    rst.getString(1),
+                    rst.getString(2),
+                    rst.getString(3),
+                    rst.getInt(4),
+                    rst.getInt(5),
+                    rst.getInt(6),
+                    rst.getDouble(7),
+                    rst.getString(8));
         }
-        return  point;
+        return null;
     }
 
 }

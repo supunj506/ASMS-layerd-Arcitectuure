@@ -15,9 +15,11 @@ import lk.ijse.asms.dao.custom.QueryDAO;
 import lk.ijse.asms.dao.custom.SubcPaymentDAO;
 import lk.ijse.asms.dao.custom.impl.PaymentPlaneDAOImpl;
 import lk.ijse.asms.dao.custom.impl.QueryDAOImpl;
+import lk.ijse.asms.dao.util.PaymentPlaneType;
 import lk.ijse.asms.db.DBConnection;
 import lk.ijse.asms.dao.custom.impl.JobDAOImpl;
 import lk.ijse.asms.dao.custom.impl.SubcPaymentDAOImpl;
+import lk.ijse.asms.dto.PaymentPlaneDTO;
 import lk.ijse.asms.dto.SubPaymentDTO;
 import lk.ijse.asms.dto.JobDTO;
 import lk.ijse.asms.util.Navigation;
@@ -81,11 +83,13 @@ public class FinishJobFormController {
         try {
             connection = DBConnection.getInstance().getConnection();
             connection.setAutoCommit(false);
-            ArrayList<Integer> ppList = paymentPlaneDAO.getPointPrice();
+            PaymentPlaneDTO power = paymentPlaneDAO.getPointDetails(PaymentPlaneType.POWER);
+            PaymentPlaneDTO data = paymentPlaneDAO.getPointDetails(PaymentPlaneType.DATA);
+            PaymentPlaneDTO camera = paymentPlaneDAO.getPointDetails(PaymentPlaneType.CAMERA);
 
-            int total = (Integer.parseInt(txtPower.getText()) * ppList.get(0)) +
-                    (Integer.parseInt(txtData.getText()) * ppList.get(1)) +
-                    (Integer.parseInt(txtCamera.getText()) * ppList.get(2));
+            double total = (Double.parseDouble(txtPower.getText()) * power.getUnitPrice()) +
+                    (Double.parseDouble(txtData.getText()) * data.getUnitPrice()) +
+                    (Double.parseDouble(txtCamera.getText()) * camera.getUnitPrice());
             JobDTO jobDTO =new JobDTO(
                     jobId,
                     LocalDate.now(),
