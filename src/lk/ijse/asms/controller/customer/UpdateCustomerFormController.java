@@ -13,6 +13,7 @@ import javafx.scene.layout.AnchorPane;
 import lk.ijse.asms.dao.custom.CustomerDAO;
 import lk.ijse.asms.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.asms.dto.CustomerDTO;
+import lk.ijse.asms.entity.Customer;
 import lk.ijse.asms.util.Navigation;
 import lk.ijse.asms.util.Routes;
 import lk.ijse.asms.util.ValidateUtil;
@@ -56,9 +57,9 @@ public class UpdateCustomerFormController {
 
     private void loadAllCustomer() {
         try {
-            ArrayList<CustomerDTO> allCustomerDTO = customerDAO.getAllCustomer();
+            ArrayList<Customer> allCustomer = customerDAO.getAll();
             ObservableList<String>obList= FXCollections.observableArrayList();
-            for(CustomerDTO customerDTO : allCustomerDTO){
+            for(Customer customerDTO : allCustomer){
                 obList.add(customerDTO.getId()+" / "+ customerDTO.getName());
             }
             cmbCusId.setItems(obList);
@@ -75,7 +76,7 @@ public class UpdateCustomerFormController {
     }
 String cusId=null;
     public void UpdateCustomerOnAction(ActionEvent actionEvent) {
-        CustomerDTO customerDTO =new CustomerDTO(
+        Customer customer =new Customer(
                 cusId,
         txtCusName.getText(),
         txtCusAddress.getText(),
@@ -87,7 +88,7 @@ String cusId=null;
 
 
         try {
-            boolean isUpdate = customerDAO.update(customerDTO);
+            boolean isUpdate = customerDAO.update(customer);
             if(isUpdate){
                 new Alert(Alert.AlertType.CONFIRMATION,"Update Customer Successfully !!!").show();
                 clean();

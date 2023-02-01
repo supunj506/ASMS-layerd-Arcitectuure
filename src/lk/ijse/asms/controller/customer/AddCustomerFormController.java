@@ -7,9 +7,11 @@ import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import lk.ijse.asms.dao.CrudDAO;
 import lk.ijse.asms.dao.custom.CustomerDAO;
 import lk.ijse.asms.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.asms.dto.CustomerDTO;
+import lk.ijse.asms.entity.Customer;
 import lk.ijse.asms.util.Navigation;
 import lk.ijse.asms.util.Routes;
 import lk.ijse.asms.util.ValidateUtil;
@@ -21,7 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 public class AddCustomerFormController {
-    CustomerDAO customerDAO=new CustomerDAOImpl();
+    CrudDAO<CustomerDTO,String> customerDAO=new CustomerDAOImpl();
     public AnchorPane addCustomerPane;
     public JFXTextField txtCusName;
     public JFXTextField txtCusAddress;
@@ -80,8 +82,8 @@ public class AddCustomerFormController {
 
     public void addCustomerOnAction(ActionEvent actionEvent) {
         try {
-            String id = customerDAO.getNextCustomerId();
-            CustomerDTO customerDTO =new CustomerDTO(
+            String id = customerDAO.getNextId();
+            CustomerDTO customerDTO=new CustomerDTO(
                     id,
                     txtCusName.getText(),
                     txtCusAddress.getText(),
