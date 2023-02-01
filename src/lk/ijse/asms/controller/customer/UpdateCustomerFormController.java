@@ -57,9 +57,9 @@ public class UpdateCustomerFormController {
 
     private void loadAllCustomer() {
         try {
-            ArrayList<Customer> allCustomer = customerDAO.getAll();
+            ArrayList<CustomerDTO> allCustomer = customerDAO.getAllCustomer();
             ObservableList<String>obList= FXCollections.observableArrayList();
-            for(Customer customerDTO : allCustomer){
+            for(CustomerDTO customerDTO : allCustomer){
                 obList.add(customerDTO.getId()+" / "+ customerDTO.getName());
             }
             cmbCusId.setItems(obList);
@@ -76,7 +76,7 @@ public class UpdateCustomerFormController {
     }
 String cusId=null;
     public void UpdateCustomerOnAction(ActionEvent actionEvent) {
-        Customer customer =new Customer(
+        CustomerDTO customer =new CustomerDTO(
                 cusId,
         txtCusName.getText(),
         txtCusAddress.getText(),

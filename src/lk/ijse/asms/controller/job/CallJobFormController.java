@@ -191,7 +191,7 @@ public class CallJobFormController {
                     boolean empTeamSave = false;
 
                     for (TeamTM temp : list) {
-                        empTeamSave = empTeamDAO.saveEmp_Team(new EmpTeamDTO(teamId, temp.getId()));
+                        empTeamSave = empTeamDAO.saveEmpTeam(new EmpTeamDTO(teamId, temp.getId()));
                     }
                     if (empTeamSave) {
                         connection.commit();

@@ -7,11 +7,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
-import lk.ijse.asms.dao.CrudDAO;
 import lk.ijse.asms.dao.custom.CustomerDAO;
 import lk.ijse.asms.dao.custom.impl.CustomerDAOImpl;
 import lk.ijse.asms.dto.CustomerDTO;
-import lk.ijse.asms.entity.Customer;
 import lk.ijse.asms.util.Navigation;
 import lk.ijse.asms.util.Routes;
 import lk.ijse.asms.util.ValidateUtil;
@@ -23,7 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 public class AddCustomerFormController {
-    CrudDAO<CustomerDTO,String> customerDAO=new CustomerDAOImpl();
+    CustomerDAO customerDAO=new CustomerDAOImpl();
     public AnchorPane addCustomerPane;
     public JFXTextField txtCusName;
     public JFXTextField txtCusAddress;
@@ -82,7 +80,7 @@ public class AddCustomerFormController {
 
     public void addCustomerOnAction(ActionEvent actionEvent) {
         try {
-            String id = customerDAO.getNextId();
+            String id = customerDAO.getNextCustomerId();
             CustomerDTO customerDTO=new CustomerDTO(
                     id,
                     txtCusName.getText(),
@@ -93,7 +91,7 @@ public class AddCustomerFormController {
                     txtCusMangerContact.getText()
 
             );
-            boolean save = customerDAO.save(customerDTO);
+            boolean save = customerDAO.saveCustomer(customerDTO);
             if(save){
                 new Alert(Alert.AlertType.CONFIRMATION,"Save  Customer Successfully !!!").show();
                 clearAllText();

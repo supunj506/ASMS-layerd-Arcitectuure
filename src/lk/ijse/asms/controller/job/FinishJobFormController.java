@@ -98,7 +98,7 @@ public class FinishJobFormController {
                     Integer.parseInt(txtData.getText()),
                     Integer.parseInt(txtCamera.getText())
             );
-            boolean finish = jobDAO.finishJob(jobDTO);
+            boolean finish = jobDAO.addJob(jobDTO);
             if (finish) {
                 connection.commit();
 

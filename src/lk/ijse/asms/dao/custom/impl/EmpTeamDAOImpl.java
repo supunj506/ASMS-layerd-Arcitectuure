@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 public class EmpTeamDAOImpl implements EmpTeamDAO {
     @Override
-    public boolean saveEmp_Team(EmpTeamDTO empTeam) throws SQLException, ClassNotFoundException {
+    public boolean saveEmpTeam(EmpTeamDTO empTeam) throws SQLException, ClassNotFoundException {
         return SQLUtil.execute("insert into emp_team values (?,?)",empTeam.getTeam_it(),empTeam.getEmp_id());
     }
 }

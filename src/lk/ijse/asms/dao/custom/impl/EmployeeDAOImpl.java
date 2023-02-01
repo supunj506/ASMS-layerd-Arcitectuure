@@ -24,7 +24,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     }
 
     @Override
-    public boolean save(EmployeeDTO employeeDTO) throws SQLException, ClassNotFoundException {
+    public boolean saveEmployee(EmployeeDTO employeeDTO) throws SQLException, ClassNotFoundException {
         return SQLUtil.execute("INSERT INTO employee VALUES  (?,?,?,?,?,?,?,?,?,?,?)",
                 employeeDTO.getId(),
                 employeeDTO.getNic(),

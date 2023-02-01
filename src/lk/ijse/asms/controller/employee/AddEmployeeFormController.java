@@ -84,7 +84,7 @@ boolean getAllData=true;
                         division,
                         LocalDate.now()
                 );
-                boolean save = employeeDAO.save(employeeDTO);
+                boolean save = employeeDAO.saveEmployee(employeeDTO);
                 if(save){
                     new Alert(Alert.AlertType.CONFIRMATION,"Add Employee Successfully !!!").show();
                     setClear();
