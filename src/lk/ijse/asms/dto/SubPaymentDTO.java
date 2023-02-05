@@ -40,6 +40,12 @@ public class SubPaymentDTO {
         this.pay_status = pay_status;
     }
 
+    public SubPaymentDTO(int data_point, int power_point, int camera_point) {
+        this.data_point = data_point;
+        this.power_point = power_point;
+        this.camera_point = camera_point;
+    }
+
     public String getId() {
         return id;
     }

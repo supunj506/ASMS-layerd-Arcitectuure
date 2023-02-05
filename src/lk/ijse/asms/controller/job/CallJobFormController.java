@@ -10,15 +10,12 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import lk.ijse.asms.dao.custom.*;
-import lk.ijse.asms.dao.custom.impl.*;
-import lk.ijse.asms.db.DBConnection;
-import lk.ijse.asms.dto.EmpTeamDTO;
+import lk.ijse.asms.bo.CallJobBOImpl;
+import lk.ijse.asms.dto.CustomDTO;
 import lk.ijse.asms.dto.JobDTO;
 import lk.ijse.asms.util.Navigation;
 import lk.ijse.asms.util.Routes;
 import lk.ijse.asms.view.tm.TeamTM;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,12 +23,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class CallJobFormController {
-
-    VehicleDAO vehicleDAO=new VehicleDAOImpl();
-    JobDAO jobDAO=new JobDAOImpl();
-    TeamDAO teamDAO=new TeamDAOImpl();
-    EmpTeamDAO empTeamDAO=new EmpTeamDAOImpl();
-    QueryDAO queryDAO=new QueryDAOImpl();
+    CallJobBOImpl callJobBO=new CallJobBOImpl();
 
     public AnchorPane callJobPane;
     public JFXComboBox <String>cmbEmployee;
@@ -47,6 +39,11 @@ public class CallJobFormController {
     public JFXButton btnCallJob;
     public ImageView deleted;
 
+    String doneBy=null;
+    boolean fullSelected=false;
+    boolean contractSelected=false;
+    ObservableList<TeamTM>list=FXCollections.observableArrayList();
+
     public void initialize(){
 
         loadJobDetails();
@@ -59,20 +56,20 @@ public class CallJobFormController {
 
     private void loadVehicleDetails() {
         try {
-             cmbVehicle.setItems(vehicleDAO.getAllVehicle());
-
+             cmbVehicle.setItems(callJobBO.lordVehicleDetails());
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
     private void loadJobDetails() {
-        ObservableList<String>list=FXCollections.observableArrayList();
+        cmbJob.setValue(null);
+        ObservableList<String>jobDetailsList=FXCollections.observableArrayList();
         try {
-            ArrayList<String> jobList = queryDAO.getJobDetails("TO DO");
+            ArrayList<String> jobList = callJobBO.getJobDetails("TO DO");
             if(!jobList.isEmpty()){
-                list.addAll(jobList);
-                cmbJob.setItems(list);
+                jobDetailsList.addAll(jobList);
+                cmbJob.setItems(jobDetailsList);
             }
 
         } catch (SQLException | ClassNotFoundException e) {
@@ -80,19 +77,14 @@ public class CallJobFormController {
         }
 
     }
-    String doneBy=null;
-    boolean fullSelected=false;
-    boolean contractSelected=false;
 
     public void fullTimeEmployeeOnAction(ActionEvent actionEvent) {
         fullSelected=true;
-
-
         try {
-            ObservableList<TeamTM> list = queryDAO.getEmployeeDetails("FULL TIME");
+            ObservableList<CustomDTO> list = callJobBO.getEmployeeDetails("FULL TIME");
             ObservableList<String> employeeList=FXCollections.observableArrayList();
-            for(TeamTM teamTM:list){
-                employeeList.add(teamTM.getId()+" / "+teamTM.getName()+" / "+teamTM.getDivision());
+            for(CustomDTO teamTM:list){
+                employeeList.add(teamTM.getEmployeeId()+" / "+teamTM.getEmployeeName()+" / "+teamTM.getDivisionType());
             }
             cmbEmployee.setItems(employeeList);
             doneBy="COMPANY";
@@ -104,10 +96,10 @@ public class CallJobFormController {
     public void contractEmployeeOnAction(ActionEvent actionEvent) {
         contractSelected=true;
         try {
-            ObservableList<TeamTM> list = queryDAO.getEmployeeDetails("CONTRACT BASE");
+            ObservableList<CustomDTO> list = callJobBO.getEmployeeDetails("CONTRACT BASE");
             ObservableList<String> employeeList=FXCollections.observableArrayList();
-            for(TeamTM teamTM:list){
-                employeeList.add(teamTM.getId()+" / "+teamTM.getName()+" / "+teamTM.getDivision());
+            for(CustomDTO teamTM:list){
+                employeeList.add(teamTM.getEmployeeId()+" / "+teamTM.getEmployeeName()+" / "+teamTM.getDivisionType());
             }
             cmbEmployee.setItems(employeeList);
                 doneBy = "SUB CONTRACT";
@@ -117,7 +109,7 @@ public class CallJobFormController {
         }
 
     }
-    ObservableList<TeamTM>list=FXCollections.observableArrayList();
+
     public void cmbEmpOnAction(ActionEvent actionEvent) {
         if(fullSelected){
             radioContract.setDisable(true);
@@ -149,6 +141,7 @@ public class CallJobFormController {
             }
         }
     }
+
     public boolean isExists(TeamTM teamTM){
         for(TeamTM temp:list){
             if(temp.getId().equals(teamTM.getId())){
@@ -158,68 +151,35 @@ public class CallJobFormController {
         return false;
     }
 
-
     public void callJobOnAction(ActionEvent actionEvent) throws SQLException {
-
         String []vehicleId=String.valueOf(cmbVehicle.getValue()).split(" / ");
         String []jobId=String.valueOf(cmbJob.getValue()).split(" / ");
         LocalDate startDate=LocalDate.now();
         String jobStatus="DOING";
-        boolean isCall=true;
-        Connection connection=null;
-        try {
+
             if(cmbJob.getValue()==(null)||cmbVehicle.getValue()==(null)||list.size()==0){
                 new Alert(Alert.AlertType.ERROR,"Missing data found Check Again !!!").show();
-            }else{
-            connection = DBConnection.getInstance().getConnection();
-            connection.setAutoCommit(false);
-                JobDTO jobDTO =new JobDTO(
+            }else {
+                JobDTO jobDTO = new JobDTO(
                         jobId[0],
                         vehicleId[0],
                         startDate,
                         jobStatus,
                         doneBy
                 );
-
-            boolean jobCall = jobDAO.callJob(jobDTO);
-            if (jobCall) {
-                connection.commit();
-                String teamId = teamDAO.getNextTeamId();
-                boolean teamSave = teamDAO.saveTeam(teamId, jobId[0]);
-                if (teamSave) {
-                    connection.commit();
-                    boolean empTeamSave = false;
-
-                    for (TeamTM temp : list) {
-                        empTeamSave = empTeamDAO.saveEmpTeam(new EmpTeamDTO(teamId, temp.getId()));
+                try {
+                    if(callJobBO.callJob(jobDTO, list)){
+                        new Alert(Alert.AlertType.CONFIRMATION,"Call Job Successfully !!!").show();
+                        clean();
                     }
-                    if (empTeamSave) {
-                        connection.commit();
-                    } else {
-                        isCall = false;
-                        connection.rollback();
-                    }
-                } else {
-                    connection.rollback();
-                    isCall = false;
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
                 }
-            } else {
-                connection.rollback();
-                isCall = false;
+
             }
-            if (isCall) {
-                new Alert(Alert.AlertType.CONFIRMATION, "Call Job Successfully !!!").show();
-                clean();
-            }
-        }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-            System.out.println(e+"");
-        }finally {
-            assert connection != null;
-            connection.setAutoCommit(true);
-        }
+
     }
+
     public void clean(){
         list.clear();
         loadJobDetails();

@@ -9,6 +9,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import lk.ijse.asms.bo.AddJobBOImpl;
 import lk.ijse.asms.dao.custom.CustomerDAO;
 import lk.ijse.asms.dao.custom.JobDAO;
 import lk.ijse.asms.dao.custom.impl.CustomerDAOImpl;
@@ -26,9 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 public class AddJobFormController {
-
-    CustomerDAO customerDAO=new CustomerDAOImpl();
-    JobDAO jobDAO=new JobDAOImpl();
+    AddJobBOImpl addJobBO=new AddJobBOImpl();
 
     public AnchorPane addJobPane;
     public JFXRadioButton radioNew;
@@ -40,7 +39,6 @@ public class AddJobFormController {
     public JFXTextField txtLocation;
     public JFXButton btnAddJob;
     LinkedHashMap<JFXTextField, Pattern> map=new LinkedHashMap<>();
-
 
     public void initialize(){
 
@@ -55,33 +53,23 @@ public class AddJobFormController {
     }
 
 boolean allDataSet=false;
-    public void backManagerFormOnAction(ActionEvent actionEvent) throws IOException {
-        Navigation.navigate(Routes.MANAGER_DASHBOARD,addJobPane);
-    }
-
-
     public void addJobOnAction(ActionEvent actionEvent) {
 
         String jobType=null;
         if(radioNew.isSelected()){
             jobType="NEW WIRING";
             allDataSet=true;
-        }else {
+        }else if (radioRe.isSelected()){
             jobType="RE WIRING";
             allDataSet=true;
         }
-        if(cmbCustomerName.getValue()==null&&datePickDudeDate.getValue()==null){
-            allDataSet=false;
 
-        }else{
-            allDataSet=true;
-        }
+        allDataSet= cmbCustomerName.getValue() != null || datePickDudeDate.getValue() != null;
         btnAddJob.setDisable(allDataSet);
-        String customerId= null;
         try {
-            String id= jobDAO.getNextJobId();
-            CustomerDTO customerByName = customerDAO.getCustomerByName(String.valueOf(cmbCustomerName.getValue()));
-            customerId=customerByName.getId();
+            String id= addJobBO.getNextJobId();
+            CustomerDTO customerByName = addJobBO.getCustomerByName(String.valueOf(cmbCustomerName.getValue()));
+            String customerId=customerByName.getId();
             JobDTO jobDTO =new JobDTO(
                     id,
                     jobType,
@@ -92,7 +80,7 @@ boolean allDataSet=false;
                     "TO DO"
 
             );
-            boolean isAdd= jobDAO.addJob(jobDTO);
+            boolean isAdd= addJobBO.addJob(jobDTO);
             if(isAdd){
                 new Alert(Alert.AlertType.CONFIRMATION,"Add Successfully !!!").show();
                 clean();
@@ -104,20 +92,9 @@ boolean allDataSet=false;
 
     }
 
-    private void clean() {
-        radioNew.setSelected(false);
-        radioRe.setSelected(false);
-        cmbCustomerName.setItems(null);
-        loadCustomerName();
-        datePickDudeDate.setValue(null);
-        txtTableCount.clear();
-        txtLocation.clear();
-
-    }
-
     private void loadCustomerName(){
         try {
-            ArrayList<CustomerDTO> allCustomerDTO = customerDAO.getAllCustomer();
+            ArrayList<CustomerDTO> allCustomerDTO = addJobBO.getAllCustomer();
             ObservableList<String>customerNames= FXCollections.observableArrayList();
 
             if(!allCustomerDTO.isEmpty()){
@@ -137,13 +114,6 @@ boolean allDataSet=false;
         }
     }
 
-    public void callJobOnAction(ActionEvent actionEvent) throws IOException {
-        Navigation.navigate(Routes.CALL_JOB,addJobPane);
-    }
-
-    public void finishJobOnAction(ActionEvent actionEvent) throws IOException {
-        Navigation.navigate(Routes.FINISH_JOB,addJobPane);
-    }
     public void keyReleasedOnAction(KeyEvent keyEvent) {
         ValidateUtil.validate(map,btnAddJob);
 
@@ -154,5 +124,28 @@ boolean allDataSet=false;
                 txt.requestFocus();
             }
         }
+    }
+
+    public void callJobOnAction(ActionEvent actionEvent) throws IOException {
+        Navigation.navigate(Routes.CALL_JOB,addJobPane);
+    }
+
+    public void finishJobOnAction(ActionEvent actionEvent) throws IOException {
+        Navigation.navigate(Routes.FINISH_JOB,addJobPane);
+    }
+
+    public void backManagerFormOnAction(ActionEvent actionEvent) throws IOException {
+        Navigation.navigate(Routes.MANAGER_DASHBOARD,addJobPane);
+    }
+
+    private void clean() {
+        radioNew.setSelected(false);
+        radioRe.setSelected(false);
+        cmbCustomerName.setItems(null);
+        loadCustomerName();
+        datePickDudeDate.setValue(null);
+        txtTableCount.clear();
+        txtLocation.clear();
+
     }
 }

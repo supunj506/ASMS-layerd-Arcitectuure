@@ -4,6 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lk.ijse.asms.dao.util.SQLUtil;
 import lk.ijse.asms.dao.custom.QueryDAO;
+import lk.ijse.asms.dto.CustomDTO;
+import lk.ijse.asms.dto.CustomerDTO;
 import lk.ijse.asms.view.tm.TeamTM;
 
 import java.sql.ResultSet;
@@ -12,12 +14,11 @@ import java.util.ArrayList;
 
 public class QueryDAOImpl implements QueryDAO {
     @Override
-    public ObservableList<TeamTM> getEmployeeDetails(String employeeType) throws SQLException, ClassNotFoundException {
-        ObservableList<TeamTM>list= FXCollections.observableArrayList();
+    public ObservableList<CustomDTO> getEmployeeDetails(String employeeType) throws SQLException, ClassNotFoundException {
+        ObservableList<CustomDTO>list= FXCollections.observableArrayList();
         ResultSet rst= SQLUtil.execute("select e.id,e.name,d.job from employee e inner join division d on e.division_id=d.id where e.e_type=?",employeeType);
         while (rst.next()){
-            //  list.add(rst.getString(1)+" / "+rst.getString(2)+" / "+rst.getString(3));
-            list.add(new TeamTM(
+            list.add(new CustomDTO(
                     rst.getString(1),
                     rst.getString(2),
                     rst.getString(3)
@@ -28,19 +29,12 @@ public class QueryDAOImpl implements QueryDAO {
     }
 
     @Override
-    public ArrayList<String> getDetailForSubcPayment(String id) throws SQLException, ClassNotFoundException {
-        String empId=null;
-        ArrayList<String>list=new ArrayList<>();
-
+    public CustomDTO getDetailForSubcPayment(String id) throws SQLException, ClassNotFoundException {
         ResultSet rst= SQLUtil.execute("select et.emp_id,j.data_point,j.power_pint,j.camera_point from emp_team et inner join team t on t.id=et.team_id inner join job j on j.id=t.job_id where j.id=?",id);
-        while ((rst.next())){
-            list.add(rst.getString(1));
-            list.add(rst.getString(2));
-            list.add(rst.getString(3));
-            list.add(rst.getString(4));
-
+        if (rst.next()){
+            return new CustomDTO(rst.getString(1),rst.getInt(2),rst.getInt(3),rst.getInt(4));
         }
-        return list;
+        return null;
     }
     @Override
     public ArrayList<String> getContractBaseFinishJob() throws SQLException, ClassNotFoundException {
